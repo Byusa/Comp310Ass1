@@ -1,3 +1,10 @@
+/*
+----------------- COMP 310/ECSE 427 Winter 2018 -----------------
+I declare that the awesomeness below is a genuine piece of work
+and falls under the McGill code of conduct, to the best of my knowledge.
+-----------------------------------------------------------------
+*/ 
+
 /*File Name: a1_command_piping.c
 Developers: <<Serge Jabo Byusa>>
 Student ID: 2060612575
