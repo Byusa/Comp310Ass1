@@ -59,10 +59,10 @@ void addToJobList(char *args[])
         job->pid = process_id;
 
         //cmd can be set to arg[0]
-        job->cmd = arg[0];
+        job->cmd = args[0];
 
         //set the job->next to point to NULL.
-        job->next= null;
+        job->next= NULL;
 
         //set the job->spawn using time function
         job->spawn = (unsigned int)time(NULL);
@@ -87,16 +87,19 @@ void addToJobList(char *args[])
 	}
 
         //init all values of the job like above num,pid,cmd.spawn
-        job->pid = process_id;
-        job->num = 1;
-	job->cmd.spawn =now;
+        struct node *other_job = malloc(sizeof(struct node)); 
+        other_job->pid = process_id;
+        other_job->number = num;
+	    other_job->spawn =(unsigned int)time(NULL);
+	    other_job->cmd = args[0];
+        other_job->next = NULL;
 
         //make next of current_job point to job
-        current_job->next = job;
+        current_job->next = other_job;
         //make job to be current_job
-        job = current_job;
+        other_job = current_job;
         //set the next of job to be NULL
-        job->next = NULL;
+        //other_job->next = NULL;
     }
 }
 
@@ -116,6 +119,7 @@ void refreshJobList()
     //perform init for pointers
     current_job = head_job;
     prev_job = head_job;
+    
 
     //traverse through the linked list
     while (current_job != NULL)
@@ -123,16 +127,26 @@ void refreshJobList()
         //use waitpid to init ret_pid variable
         ret_pid = waitpid(current_job->pid, NULL, WNOHANG);
         //one of the below needs node removal from linked list
+        
         if (ret_pid == 0)
         {
-            //what does this mean
-            //do the needful
-            
+            //In this case the information of status is not available
+            //hence not yet done then we go to the next job in the linkedList
+           prev_job = current_job;
+           current_job = current_job -> next;
         }
         else
         {
-            //what does this mean
-            //do the needful
+            //In this case the information of status is available
+            //hence you're done then we go to the next job in the linkedList
+            //then remove the from the linkedList
+            prev_job->next =  current_job->next;
+            //this is for the corner case like when it has only one head
+            if(current_job == head_job){
+                head_job = current_job->next;
+                free(current_job);
+            }
+            current_job =  prev_job->next;
             
         }
     }
@@ -149,13 +163,15 @@ void listAllJobs()
     refreshJobList();
 
     //init current_job with head_job
-
+   current_job = head_job;
     //heading row print only once.
     printf("\nID\tPID\tCmd\tstatus\tspawn-time\n");
         
         //traverse the linked list and print using the following statement for each job
-            printf("%d\t%d\t%s\tRUNNING\t%s\n", current_job->number, current_job->pid, current_job->cmd, ctime(&(current_job->spawn)));
-           
+            while(current_job->next != NULL){
+                printf("%d\t%d\t%s\tRUNNING\t%s\n", current_job->number, current_job->pid, current_job->cmd, ctime(&(current_job->spawn)));
+                    current_job=current_job->next;
+                }   
         
     return;
 }
