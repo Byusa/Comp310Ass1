@@ -81,7 +81,7 @@ void addToJobList(char *args[])
         current_job = head_job;
         //traverse the linked list to reach the last job
 	   int num=0;
-        while(current_job != NULL){
+        while(current_job->next != NULL){
 	        current_job= current_job->next;
 	        num++;
 	    }
@@ -380,29 +380,40 @@ int main(void)
             int result = 0;
             // if no destination directory given 
             // change to home directory
-            fd1 = open();
+
             if(args[1]==NULL){
                 chdir(getenv("HOME"));
             }
             //if given directory does not exist
             //print directory does not exit
-            int r = arg[1];
-            if( r == 0 ){
+            else if(args[1] == 0 ){
                 printf("The directory you inputed does not exist");
             }
             //if everthing is fine 
             //change to destination directory 
-            //.........back
+            //.........get back at it
+            else{
+                chdir(args[1]);
+            }
         }
         else if (!strcmp("pwd", args[0]))
         {
             //use getcwd and print the current working directory
-            
+         char cwd[1024];
+         /*if (chdir("/tmp") != 0)
+            perror("chdir() error()");
+        else {*/
+                if (getcwd(cwd, sizeof(cwd)) == NULL)
+                    perror("getcwd() error");
+                else
+                    printf("current working directory is: %s\n", cwd);
+            //}
         }
         else if(!strcmp("wc",args[0]))
         {
             //call the word count function
-            wordCount(args[2],args[1]);
+            int countW = wordCount(args[2],args[1]);
+            printf("%d",countW);
         }
         else
         {
@@ -413,7 +424,7 @@ int main(void)
             (3) if background is not specified, the parent will wait,
                 otherwise parent starts the next command... */
 
-
+            
             //hint : samosas are nice but often there 
             //is a long waiting line for it.
 
@@ -429,6 +440,7 @@ int main(void)
                 {
                     //FOREGROUND
                     // waitpid with proper argument required
+                    waitpid(pid, &status, 0);
                 }
                 else
                 {
@@ -436,6 +448,7 @@ int main(void)
                     process_id = pid;
                     addToJobList(args);
                     // waitpid with proper argument required
+                    //.....back
                 }
             }
             else
@@ -450,7 +463,15 @@ int main(void)
                 //check if args has ">"
                 //if yes set isred to 1
                 //else set isred to 0
-
+                int seperator = 0;
+                //checking if there is a redirect in the args array
+                for(int j=0; j<cnt; j++){
+                    if(strcmp(args[j], ">")==0){
+                        isred = 1;
+                        seperator = j;
+                    }
+                }
+                
                 //if redirection is enabled
                 if (isred == 1)
                 {
@@ -459,14 +480,29 @@ int main(void)
                     //while you use open (man 2 open) to open file
 
                     //set ">" and redirected filename to NULL
-                    args[i] = NULL;
-                    args[i + 1] = NULL;
-
-                    //run your command
+                    //args[i] = NULL; .....back
+                    //args[i + 1] = NULL;
+                    char *narg[20];
+                    for(int k=0; k< seperator; k++){
+                        narg[k] =args[k];
+                    }
+                    narg[seperator] = NULL;
+                    
+                    int stdou = dup(1);
+                    close(1);
+                    
+                    int f = open(args[seperator +1], O_CREAT | O_APPEND | O_RDWR, 0777);
+                    int i = execvp(narg[0],narg);
                     execvp(args[0], args);
-
+                    if(i < 0){
+                        printf("%s\n", "Child process error");
+                        exit(1);
+                    }
+                    close(f);
+                    dup2(stdou,1);
+                    close(stdou);
                     //restore to stdout
-                    fflush(stdout);
+                    //fflush(stdout);
                 }
                 else
                 {
