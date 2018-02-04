@@ -80,11 +80,11 @@ void addToJobList(char *args[])
         //point current_job to head_job
         current_job = head_job;
         //traverse the linked list to reach the last job
-	int num=0;
+	   int num=0;
         while(current_job != NULL){
-	  current_job= current_job->next;
-	  num++;
-	}
+	        current_job= current_job->next;
+	        num++;
+	    }
 
         //init all values of the job like above num,pid,cmd.spawn
         struct node *other_job = malloc(sizeof(struct node)); 
@@ -92,7 +92,7 @@ void addToJobList(char *args[])
         other_job->number = num;
 	    other_job->spawn =(unsigned int)time(NULL);
 	    other_job->cmd = args[0];
-        other_job->next = NULL;
+        other_job->next = NULL; /////..........back
 
         //make next of current_job point to job
         current_job->next = other_job;
@@ -132,8 +132,8 @@ void refreshJobList()
         {
             //In this case the information of status is not available
             //hence not yet done then we go to the next job in the linkedList
-           prev_job = current_job;
-           current_job = current_job -> next;
+           prev_job = current_job;  //move previous job to prev.next
+           current_job = current_job -> next; //move current job to current.next
         }
         else
         {
@@ -194,17 +194,39 @@ void waitForEmptyLL(int nice, int bg)
 }
 
 //function to perform word count
- int wordCount(char *filename,char* flag)
+ int wordCount(char *filename,char* flag) //....back
  {
      int cnt;
-     //if flag is l 
-     //count the number of lines in the file 
-     //set it in cnt
-
-     //if flag is w
-     //count the number of words in the file
-     //set it in cnt
-
+     char ch;
+     cnt = 0;
+    //first lets open the file
+    FILE *filepointer = fopen(filename, "r");
+    
+    //check the validity of the file
+    if(filepointer == NULL){
+        printf("Error in openning the file%s", filename);
+        return 0;
+    }
+    //if flag is l, count the number of lines in the file set it in cnt
+    if(strcmp(flag,"l")==0){
+          while((ch=fgetc(filepointer))!=EOF){
+              if(ch =='\n'){
+                 cnt++;
+              }
+          }
+          return cnt;
+      }//else flag is w, count the number of words in the file set it in cnt
+      else if(strcmp(flag,"w")==0){
+          while((ch=fgetc(filepointer))!=EOF){
+              if (ch == ' ' || ch == '\n'){
+                 cnt++;
+              }
+          }
+          return cnt;
+      }else{
+          return cnt; 
+      }
+      fclose(filepointer);
      return cnt;
  }
 
@@ -229,13 +251,18 @@ int waitforjob(char *jobnc)
     struct node *trv;
     int jobn = (*jobnc) - '0';
     trv = head_job;
+    pid_t ret_pid;
     //traverse through linked list and find the corresponding job
     //hint : traversal done in other functions too
-    
-        //if correspoding job is found 
-        //use its pid to make the parent process wait.
-        //waitpid with proper argument needed here
-    
+    while(trv!= NULL){
+        //here the correspoding job is found 
+        if(trv->number == jobn){
+            //using its pid to make the parent process wait.// with waitpid with proper argument
+            waitpid(trv->pid, NULL, WUNTRACED);
+            break;
+        }
+            trv=trv->next;
+    }
     return 0;
 }
 
@@ -299,7 +326,7 @@ int main(void)
     //where each pointer points to a string
     //which may be command , flag or filename
     char *args[20];
-
+   
     //flag variables for background, status and nice
     //bg set to 1 if the command is to executed in background
     //nice set to 1 if the command is nice
@@ -352,13 +379,20 @@ int main(void)
         {
             int result = 0;
             // if no destination directory given 
-            // change to home directory 
-
+            // change to home directory
+            fd1 = open();
+            if(args[1]==NULL){
+                chdir(getenv("HOME"));
+            }
             //if given directory does not exist
             //print directory does not exit
-
+            int r = arg[1];
+            if( r == 0 ){
+                printf("The directory you inputed does not exist");
+            }
             //if everthing is fine 
             //change to destination directory 
+            //.........back
         }
         else if (!strcmp("pwd", args[0]))
         {
@@ -445,3 +479,4 @@ int main(void)
 
     return 0;
 }
+
