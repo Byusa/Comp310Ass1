@@ -463,12 +463,12 @@ int main(void)
                 //check if args has ">"
                 //if yes set isred to 1
                 //else set isred to 0
-                int seperator = 0;
+                int seprt = 0;
                 //checking if there is a redirect in the args array
                 for(int j=0; j<cnt; j++){
                     if(strcmp(args[j], ">")==0){
                         isred = 1;
-                        seperator = j;
+                        seprt = j;
                     }
                 }
                 
@@ -483,26 +483,26 @@ int main(void)
                     //args[i] = NULL; .....back
                     //args[i + 1] = NULL;
                     char *narg[20];
-                    for(int k=0; k< seperator; k++){
+                    for(int k=0; k< seprt; k++){
                         narg[k] =args[k];
                     }
-                    narg[seperator] = NULL;
+                    narg[seprt] = NULL;
                     
                     int stdou = dup(1);
                     close(1);
                     
-                    int f = open(args[seperator +1], O_CREAT | O_APPEND | O_RDWR, 0777);
+                    int f = open(args[seprt +1], O_CREAT | O_APPEND | O_RDWR, 0777);
                     int i = execvp(narg[0],narg);
                     execvp(args[0], args);
                     if(i < 0){
-                        printf("%s\n", "Child process error");
+                        printf("%s\n", "There is an error in Child process error");
                         exit(1);
                     }
                     close(f);
                     dup2(stdou,1);
                     close(stdou);
                     //restore to stdout
-                    //fflush(stdout);
+                    fflush(stdout);
                 }
                 else
                 {
