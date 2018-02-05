@@ -208,7 +208,7 @@ void waitForEmptyLL(int nice, int bg)
         return 0;
     }
     //if flag is l, count the number of lines in the file set it in cnt
-    if(strcmp(flag,"l")==0){
+    if(strcmp(flag,"-l")==0){
           while((ch=fgetc(filepointer))!=EOF){
               if(ch =='\n'){
                  cnt++;
@@ -216,7 +216,7 @@ void waitForEmptyLL(int nice, int bg)
           }
           return cnt;
       }//else flag is w, count the number of words in the file set it in cnt
-      else if(strcmp(flag,"w")==0){
+      else if(strcmp(flag,"-w")==0){
           while((ch=fgetc(filepointer))!=EOF){
               if (ch == ' ' || ch == '\n'){
                  cnt++;
@@ -515,4 +515,6 @@ int main(void)
 
     return 0;
 }
+
+
 
